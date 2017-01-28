@@ -26,6 +26,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open var urlMaximumLength: Int?
     
     open var configureLinkAttribute: ConfigureLinkAttribute?
+    
+    open var fuzzyHeightMatching: Bool = false
 
     @IBInspectable open var mentionColor: UIColor = .blue {
         didSet { updateTextStorage(parseText: false) }
@@ -433,12 +435,24 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
 
         var correctLocation = location
-        correctLocation.y -= heightCorrection
-        let boundingRect = layoutManager.boundingRect(forGlyphRange: NSRange(location: 0, length: textStorage.length), in: textContainer)
+        var boundingRect = layoutManager.boundingRect(forGlyphRange: NSRange(location: 0, length: textStorage.length), in: textContainer)
+        
+        if fuzzyHeightMatching {
+            boundingRect = boundingRect.insetBy(dx: 0, dy: -heightCorrection)
+        } else {
+            correctLocation.y -= heightCorrection
+        }
+        
+        // Compare our touch location to the full height of the view
         guard boundingRect.contains(correctLocation) else {
             return nil
         }
 
+        // Now that we've used the full heigt, figure out where the touch occured using the correct height
+        if fuzzyHeightMatching {
+            correctLocation.y -= heightCorrection
+        }
+        
         let index = layoutManager.glyphIndex(for: correctLocation, in: textContainer)
         
         for element in activeElements.map({ $0.1 }).joined() {
