@@ -233,6 +233,15 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         return avoidSuperCall
     }
 
+    override open func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        var hitFrame = self.bounds
+        if fuzzyHeightMatching {
+            let hitTestEdgeInsets = UIEdgeInsets(top: -heightCorrection, left: 0, bottom: -heightCorrection, right: 0)
+            hitFrame = UIEdgeInsetsInsetRect(hitFrame, hitTestEdgeInsets)
+        }
+        return hitFrame.contains(point)
+    }
+
     // MARK: - private properties
     fileprivate var _customizing: Bool = true
     fileprivate var defaultCustomColor: UIColor = .black
