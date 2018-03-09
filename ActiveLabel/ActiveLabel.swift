@@ -282,18 +282,27 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             return
         }
 
-        let mutAttrString = addLineBreak(attributedText)
+        let mutAttrString = NSMutableAttributedString(attributedString: attributedText)
+
+        // If the string changes in length, then we need to reset the string (because the attributes have changed indexes)
+        // Otherwise, we can use the attributed string as is
+        var removeAttributes = false
 
         if parseText {
             clearActiveElements()
             let newString = parseTextAndExtractActiveElements(mutAttrString)
-            mutAttrString.mutableString.setString(newString)
+            if newString.count != mutAttrString.string.count {
+                mutAttrString.mutableString.setString(newString)
+                removeAttributes = true
+            }
         }
 
         addLinkAttribute(mutAttrString)
         textStorage.setAttributedString(mutAttrString)
         _customizing = true
-        text = mutAttrString.string
+        if removeAttributes {
+            text = mutAttrString.string
+        }
         _customizing = false
         setNeedsDisplay()
     }

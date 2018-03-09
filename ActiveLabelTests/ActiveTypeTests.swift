@@ -255,7 +255,7 @@ class ActiveTypeTests: XCTestCase {
     }
 
     func testRemoveHandleMention() {
-        label.handleMentionTap({_ in })
+        label.handleMentionTap({_, _ in })
         XCTAssertNotNil(label.handleMentionTap)
         
         label.removeHandle(for: .mention)
@@ -263,7 +263,7 @@ class ActiveTypeTests: XCTestCase {
     }
     
     func testRemoveHandleHashtag() {
-        label.handleHashtagTap({_ in })
+        label.handleHashtagTap({_, _ in })
         XCTAssertNotNil(label.handleHashtagTap)
         
         label.removeHandle(for: .hashtag)
@@ -271,7 +271,7 @@ class ActiveTypeTests: XCTestCase {
     }
     
     func testRemoveHandleURL() {
-        label.handleURLTap({_ in })
+        label.handleURLTap({_, _ in })
         XCTAssertNotNil(label.handleURLTap)
         
         label.removeHandle(for: .url)
@@ -282,8 +282,8 @@ class ActiveTypeTests: XCTestCase {
         let newType1 = ActiveType.custom(pattern: "\\sare1\\b")
         let newType2 = ActiveType.custom(pattern: "\\sare2\\b")
         
-        label.handleCustomTap(for: newType1, handler: {_ in })
-        label.handleCustomTap(for: newType2, handler: {_ in })
+        label.handleCustomTap(for: newType1, handler: {_, _ in })
+        label.handleCustomTap(for: newType2, handler: {_, _ in })
         XCTAssertEqual(label.customTapHandlers.count, 2)
         
         label.removeHandle(for: newType1)
@@ -397,12 +397,13 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(currentElementType, customEmptyType)
     }
 
+    // urlMaxiumumLength no longer works because we never want to change the string length now that we've enabled attributed strings
     func testStringTrimming() {
         let text = "Tweet with long url: https://twitter.com/twicket_app/status/649678392372121601 and short url: https://hello.co"
         label.urlMaximumLength = 30
         label.text = text
 
-        XCTAssertNotEqual(text.characters.count, label.text!.characters.count)
+        XCTAssertNotEqual(text.count, label.text!.count)
     }
 
     func testStringTrimmingURLShorterThanLimit() {
@@ -413,6 +414,7 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(text, label.text!)
     }
 
+    // urlMaxiumumLength no longer works because we never want to change the string length now that we've enabled attributed strings
     func testStringTrimmingURLLongerThanLimit() {
         let trimLimit = 30
         let url = "https://twitter.com/twicket_app/status/649678392372121601"
@@ -422,7 +424,7 @@ class ActiveTypeTests: XCTestCase {
         label.text = text
 
 
-        XCTAssertNotEqual(text.characters.count, label.text!.characters.count)
+        XCTAssertNotEqual(text.count, label.text!.count)
 
         switch activeElements.first! {
         case .url(let original, let trimmed):
@@ -431,6 +433,5 @@ class ActiveTypeTests: XCTestCase {
         default:
             XCTAssert(false)
         }
-
     }
 }
