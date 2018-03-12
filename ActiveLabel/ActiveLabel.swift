@@ -282,7 +282,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             return
         }
 
-        let mutAttrString = NSMutableAttributedString(attributedString: attributedText)
+        let mutAttrString = NSMutableAttributedString(attributedString: addLineBreak(attributedText))
 
         // If the string changes in length, then we need to reset the string (because the attributes have changed indexes)
         // Otherwise, we can use the attributed string as is
