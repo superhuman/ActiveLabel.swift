@@ -11,6 +11,7 @@ import UIKit
 
 public protocol ActiveLabelDelegate: class {
     func didSelect(_ text: String, type: ActiveType, range: NSRange)
+    func didLongTap(_ text: String, type: ActiveType, range: NSRange)
 }
 
 public typealias ConfigureLinkAttribute = (ActiveType, [NSAttributedStringKey : Any], Bool) -> ([NSAttributedStringKey : Any])
@@ -87,6 +88,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
     open func handleCustomTap(for type: ActiveType, handler: @escaping (String, NSRange) -> ()) {
         customTapHandlers[type] = handler
+    }
+
+    open func handleCustomLongTap(for type: ActiveType, handler: @escaping (String, NSRange) -> ()) {
+        customLongTapHandlers[type] = handler
     }
 	
     open func removeHandle(for type: ActiveType) {
@@ -194,6 +199,22 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         let location = touch.location(in: self)
         var avoidSuperCall = false
 
+        // Manage long tap timer
+        if touch.phase == .began {
+            beginLongTapTimer(location: location)
+        } else if touch.phase != .moved {
+            endLongTapTimer()
+        }
+
+        // Avoid simultaneous detection of regular tap and long tap:
+        // If we have already detected a long tap, reset it and don't allow this touch to be detected as a regular tap
+        // Else we will see regular tap behavior as soon as user lifts up the finger after a long tap
+        if hasDetectedLongTap {
+            return false
+        }
+
+        // Manage regular tap
+
         switch touch.phase {
         case .began, .moved:
             if let element = element(at: location) {
@@ -242,6 +263,27 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         return hitFrame.contains(point)
     }
 
+    // MARK: - Long tap handling
+    private func beginLongTapTimer(location: CGPoint) {
+        hasDetectedLongTap = false
+        longTapLocation = location
+        longTapTimer = Timer.scheduledTimer(timeInterval: 0.25, target: self, selector: #selector(fireLongTapEvent), userInfo: nil, repeats: false)
+    }
+
+    private func endLongTapTimer() {
+        longTapTimer?.invalidate()
+        longTapTimer = nil
+    }
+
+    @objc private func fireLongTapEvent() {
+        if let location = longTapLocation,
+            let selectedElement = element(at: location),
+            case let .custom(string) = selectedElement.element {
+            hasDetectedLongTap = true
+            didLongTap(string, for: selectedElement.type, range: selectedElement.range)
+        }
+    }
+
     // MARK: - private properties
     fileprivate var _customizing: Bool = true
     fileprivate var defaultCustomColor: UIColor = .black
@@ -250,6 +292,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     internal var hashtagTapHandler: ((String, NSRange) -> ())?
     internal var urlTapHandler: ((URL, NSRange) -> ())?
     internal var customTapHandlers: [ActiveType : ((String, NSRange) -> ())] = [:]
+    internal var customLongTapHandlers: [ActiveType : ((String, NSRange) -> ())] = [:]
     
     fileprivate var mentionFilterPredicate: ((String) -> Bool)?
     fileprivate var hashtagFilterPredicate: ((String) -> Bool)?
@@ -260,6 +303,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     fileprivate lazy var layoutManager = NSLayoutManager()
     fileprivate lazy var textContainer = NSTextContainer()
     lazy var activeElements = [ActiveType: [ElementTuple]]()
+
+    var longTapTimer: Timer?
+    var longTapLocation: CGPoint?
+    var hasDetectedLongTap: Bool = false
 
     // MARK: - helper functions
     
@@ -536,6 +583,14 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     fileprivate func didTap(_ element: String, for type: ActiveType, range: NSRange) {
         guard let elementHandler = customTapHandlers[type] else {
             delegate?.didSelect(element, type: type, range: range)
+            return
+        }
+        elementHandler(element, range)
+    }
+
+    fileprivate func didLongTap(_ element: String, for type: ActiveType, range: NSRange) {
+        guard let elementHandler = customLongTapHandlers[type] else {
+            delegate?.didLongTap(element, type: type, range: range)
             return
         }
         elementHandler(element, range)
