@@ -107,6 +107,13 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
     }
 
+    open func removeAllHanders() {
+        hashtagTapHandler = nil
+        mentionTapHandler = nil
+        urlTapHandler = nil
+        customTapHandlers = [:]
+    }
+
     open func filterMention(_ predicate: @escaping (String) -> Bool) {
         mentionFilterPredicate = predicate
         updateTextStorage()
