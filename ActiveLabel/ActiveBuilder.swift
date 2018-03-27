@@ -60,8 +60,13 @@ struct ActiveBuilder {
                                                 filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
         switch type {
         case .customRange(let range):
-            let substring = (text as NSString).substring(with: range)
-            return [(range, ActiveElement.create(with: type, text: substring), type)]
+            let string = text as NSString
+            if range.location + range.length <= string.length {
+                let substring = string.substring(with: range)
+                return [(range, ActiveElement.create(with: type, text: substring), type)]
+            } else {
+                return []
+            }
         default:
             let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
             let nsstring = text as NSString
