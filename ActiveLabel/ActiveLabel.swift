@@ -14,7 +14,7 @@ public protocol ActiveLabelDelegate: class {
     func didLongTap(_ text: String, type: ActiveType, range: NSRange)
 }
 
-public typealias ConfigureLinkAttribute = (ActiveType, [NSAttributedStringKey : Any], Bool) -> ([NSAttributedStringKey : Any])
+public typealias ConfigureLinkAttribute = (ActiveType, [NSAttributedString.Key : Any], Bool) -> ([NSAttributedString.Key : Any])
 typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveType)
 
 @IBDesignable open class ActiveLabel: UILabel {
@@ -265,7 +265,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         var hitFrame = self.bounds
         if fuzzyHeightMatching {
             let hitTestEdgeInsets = UIEdgeInsets(top: -heightCorrection, left: 0, bottom: -heightCorrection, right: 0)
-            hitFrame = UIEdgeInsetsInsetRect(hitFrame, hitTestEdgeInsets)
+            hitFrame = hitFrame.inset(by: hitTestEdgeInsets)
         }
         return hitFrame.contains(point)
     }
@@ -380,23 +380,23 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         var range = NSRange(location: 0, length: 0)
         var attributes = mutAttrString.attributes(at: 0, effectiveRange: &range)
         
-        attributes[NSAttributedStringKey.font] = font!
-        attributes[NSAttributedStringKey.foregroundColor] = textColor
+        attributes[NSAttributedString.Key.font] = font!
+        attributes[NSAttributedString.Key.foregroundColor] = textColor
         mutAttrString.addAttributes(attributes, range: range)
 
-        attributes[NSAttributedStringKey.foregroundColor] = mentionColor
+        attributes[NSAttributedString.Key.foregroundColor] = mentionColor
 
         for (type, elements) in activeElements {
 
             switch type {
-            case .mention: attributes[NSAttributedStringKey.foregroundColor] = mentionColor
-            case .hashtag: attributes[NSAttributedStringKey.foregroundColor] = hashtagColor
-            case .url: attributes[NSAttributedStringKey.foregroundColor] = URLColor
-            case .custom, .customRange: attributes[NSAttributedStringKey.foregroundColor] = customColor[type] ?? defaultCustomColor
+            case .mention: attributes[NSAttributedString.Key.foregroundColor] = mentionColor
+            case .hashtag: attributes[NSAttributedString.Key.foregroundColor] = hashtagColor
+            case .url: attributes[NSAttributedString.Key.foregroundColor] = URLColor
+            case .custom, .customRange: attributes[NSAttributedString.Key.foregroundColor] = customColor[type] ?? defaultCustomColor
             }
             
             if let highlightFont = hightlightFont {
-                attributes[NSAttributedStringKey.font] = highlightFont
+                attributes[NSAttributedString.Key.font] = highlightFont
             }
 			
             if let configureLinkAttribute = configureLinkAttribute {
@@ -447,12 +447,12 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         var range = NSRange(location: 0, length: 0)
         var attributes = mutAttrString.attributes(at: 0, effectiveRange: &range)
         
-        let paragraphStyle = attributes[NSAttributedStringKey.paragraphStyle] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
+        let paragraphStyle = attributes[NSAttributedString.Key.paragraphStyle] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
         paragraphStyle.alignment = textAlignment
         paragraphStyle.lineSpacing = lineSpacing
         paragraphStyle.minimumLineHeight = minimumLineHeight > 0 ? minimumLineHeight: self.font.pointSize * 1.14
-        attributes[NSAttributedStringKey.paragraphStyle] = paragraphStyle
+        attributes[NSAttributedString.Key.paragraphStyle] = paragraphStyle
         mutAttrString.setAttributes(attributes, range: range)
 
         return mutAttrString
@@ -476,7 +476,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 let possibleSelectedColor = customSelectedColor[selectedElement.type] ?? customColor[selectedElement.type]
                 selectedColor = possibleSelectedColor ?? defaultCustomColor
             }
-            attributes[NSAttributedStringKey.foregroundColor] = selectedColor
+            attributes[NSAttributedString.Key.foregroundColor] = selectedColor
         } else {
             let unselectedColor: UIColor
             switch type {
@@ -485,11 +485,11 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .url: unselectedColor = URLColor
             case .custom, .customRange: unselectedColor = customColor[selectedElement.type] ?? defaultCustomColor
             }
-            attributes[NSAttributedStringKey.foregroundColor] = unselectedColor
+            attributes[NSAttributedString.Key.foregroundColor] = unselectedColor
         }
         
         if let highlightFont = hightlightFont {
-            attributes[NSAttributedStringKey.font] = highlightFont
+            attributes[NSAttributedString.Key.font] = highlightFont
         }
         
         if let configureLinkAttribute = configureLinkAttribute {
