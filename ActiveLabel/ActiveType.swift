@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum ActiveElement {
+enum ActiveElement: Hashable {
     case mention(String)
     case hashtag(String)
     case url(original: String, trimmed: String)
@@ -24,7 +24,7 @@ enum ActiveElement {
     }
 }
 
-public enum ActiveType {
+public enum ActiveType: Hashable {
     case mention
     case hashtag
     case url
@@ -39,28 +39,5 @@ public enum ActiveType {
         case .custom(let regex): return regex
         case .customRange(_): return ""
         }
-    }
-}
-
-extension ActiveType: Hashable, Equatable {
-    public var hashValue: Int {
-        switch self {
-        case .mention: return -1
-        case .hashtag: return -2
-        case .url: return -3
-        case .custom(let regex): return regex.hashValue
-        case .customRange(let range): return range.hashValue
-        }
-    }
-}
-
-public func ==(lhs: ActiveType, rhs: ActiveType) -> Bool {
-    switch (lhs, rhs) {
-    case (.mention, .mention): return true
-    case (.hashtag, .hashtag): return true
-    case (.url, .url): return true
-    case (.custom(let pattern1), .custom(let pattern2)): return pattern1 == pattern2
-    case (.customRange(let range1), .customRange(let range2)): return range1 == range2
-    default: return false
     }
 }

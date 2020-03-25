@@ -195,8 +195,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     // MARK: - Auto layout
 
     open override var intrinsicContentSize: CGSize {
-        let maxWidth = max(bounds.width, super.intrinsicContentSize.width)
-        textContainer.size = CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude)
+        textContainer.size = CGSize(width: self.preferredMaxLayoutWidth, height: CGFloat.greatestFiniteMagnitude)
         let size = layoutManager.usedRect(for: textContainer)
         return CGSize(width: ceil(size.width), height: ceil(size.height))
     }
@@ -254,7 +253,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         case .cancelled:
             updateAttributesWhenSelected(false)
             selectedElement = nil
-        case .stationary:
+        default:
             break
         }
 
