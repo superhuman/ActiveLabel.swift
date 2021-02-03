@@ -186,6 +186,16 @@ class ActiveTypeTests: XCTestCase {
 
         label.text = "google.com"
         XCTAssertEqual(activeElements.count, 0)
+        
+        label.text = "parens (pic.twitter.com/YUGdEbUx)"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "pic.twitter.com/YUGdEbUx")
+        XCTAssertEqual(currentElementType, ActiveType.url)
+        
+        label.text = "parens (https://www.google.com/hello)"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "https://www.google.com/hello")
+        XCTAssertEqual(currentElementType, ActiveType.url)
     }
 
     func testCustomType() {
